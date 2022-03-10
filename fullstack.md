@@ -120,6 +120,127 @@ When `npx prisma migrate dev` is executed against a newly created database, seed
 npm install @prisma/client
 ```
 
+## Testing
+
+```
+yarn add type-graphql reflect-metadata
+```
+
+
+
+```
+yarn add --dev jest prettier
+```
+
+### Using TypeScript via ts-jest
+
+```
+yarn add --dev @types/jest ts-jest ts-node ts-node-dev
+```
+
+create `jest-config.ts`
+
+```
+/*
+ * For a detailed explanation regarding each configuration property and type check, visit:
+ * https://jestjs.io/docs/configuration
+ */
+
+export default {
+    clearMocks: true,
+    collectCoverage: true,  
+    coverageDirectory: "coverage",
+    coverageProvider: "v8",
+    transform: {
+      "^.+\\.[t|j]s$": "ts-jest"
+    },
+    testTimeout: 30000
+  };
+```
+
+create a target file `tests/sum.ts`.
+
+```tsx
+const sum = (x: number, y: number) => {
+    return x + y 
+}
+
+export default sum
+```
+
+Then, create a file named `tests/sum.test.ts`. This will contain our actual test:
+
+```javascript
+import sum from './sum'
+
+test('adds 1 + 2 to equal 3', () => {
+  expect(sum(1, 2)).toBe(3);
+});
+```
+
+Add the following section to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "test": "jest"
+  }
+}
+```
+
+Finally, run `yarn test` or `npm run test` and Jest will print this message:
+
+```bash
+PASS  ./sum.test.js
+✓ adds 1 + 2 to equal 3 (5ms)
+```
+
+This test used `expect` and `toBe` to test that two values were exactly identical. To learn about the other things that Jest can test, see [Using Matchers](https://jestjs.io/docs/using-matchers).
+
+### Configuring Jest
+
+Jest's configuration can be defined in the `package.json` file of your project, or through a `jest.config.js`, or `jest.config.ts` file or through the `--config <path/to/file.js|ts|cjs|mjs|json>` option. If you'd like to use your `package.json` to store Jest's config, the `"jest"` key should be used on the top level so Jest will know how to find your settings:
+
+```json
+{
+  "name": "my-project",
+  "jest": {
+    "verbose": true
+  }
+}
+```
+
+Or through TypeScript (if `ts-node` is installed):
+
+`jest.config.ts`
+
+```ts
+import type {Config} from '@jest/types';
+
+// Sync object
+const config: Config.InitialOptions = {
+  verbose: true,
+};
+export default config;
+
+// Or async function
+export default async (): Promise<Config.InitialOptions> => {
+  return {
+    verbose: true,
+  };
+};
+```
+
+### Suplements for Tests
+
+```
+yarn add -D get-port graphql-request
+```
+
+
+
+---
+
 # Frontend
 
 ## Apollo client
@@ -681,4 +802,21 @@ export const schema = applyMiddleware(schemaWithoutPermissions, permissions)
 must add AuthPayload
 
 ## Client
+
+# Logger
+
+## pino
+
+```
+yarn add pino pino-pretty
+```
+
+use
+
+```js
+export const logger = pino({
+  level: "debug", //process.env.LOGGER_LEVEL || 
+  prettyPrint: true
+})
+```
 
