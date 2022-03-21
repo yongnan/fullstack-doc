@@ -803,9 +803,28 @@ must add AuthPayload
 
 ## Client
 
-# Logger
+# Graphql
 
-## pino
+## gqlgenerator
+
+```bash
+# Install
+npm install gql-generator -g
+
+# see the usage
+gqlg --help
+
+# Generate sample queries from schema file
+gqlg --schemaFilePath ./example/sampleTypeDef.graphql --destDirPath ./example/output --depthLimit 5
+```
+
+
+
+# Tools
+
+## Logger
+
+### pino
 
 ```
 yarn add pino pino-pretty
