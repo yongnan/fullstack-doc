@@ -67,7 +67,9 @@
 
 * **SSG + ISR: incremental static regeneration**  (uses revalidate in getStaticProps)
 
-  *  
+  [next doc](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration)
+
+   
 
 * Mixed (**SSG + client**) : 
 
