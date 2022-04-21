@@ -1,77 +1,256 @@
 # Next.js
 
-## page types
+## Data Fetching
 
-* **CSR: Client-side rendering** (uses no initial props)  
+### **CSR**
 
-  [next doc](https://nextjs.org/docs/basic-features/data-fetching/client-side)
+**Client-side rendering** (uses no initial props)
 
-  
+[next doc](https://nextjs.org/docs/basic-features/data-fetching/client-side)
 
-  * run: client side
+* run: client side
+* Build: page
+* at the **page** level: the data is fetched at runtime, and the content of the page is updated as the data changes. at the **component** level: the data is fetched at the time of the component mount, and the content of the component is updated as the data changes. 
 
-  * Build: page
+Tools:
 
-  * at the **page** level: the data is fetched at runtime, and the content of the page is updated as the data changes. at the **component** level: the data is fetched at the time of the component mount, and the content of the component is updated as the data changes.
+​	useEffect (React Hook) of SWR
 
-     
+```js
+function Profile() {
+  const [data, setData] = useState(null)
+  const [isLoading, setLoading] = useState(false)
 
-  best suited
+  useEffect(() => {
+    setLoading(true)
+    fetch('api/profile-data')
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data)
+        setLoading(false)
+      })
+  }, [])
 
-  * page doesn't require SEO indexing
-  * don't need to pre-render your data
-  * content of pages needs to update frequently.
+  if (isLoading) return <p>Loading...</p>
+  if (!data) return <p>No profile data</p>
 
-   
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.bio}</p>
+    </div>
+  )
+}
+```
 
-* **SSR: Client-side rendering** (uses getInitialProps or getServerSideProps) : 
+useSWR
 
-  [next doc](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props)
+```js
+import useSWR from 'swr'
 
-  * only runs on server-side and never runs on the browser.
+const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
-  * When request this page directly,  `getServerSideProps` runs at request time
+function Profile() {
+  const { data, error } = useSWR('/api/profile-data', fetcher)
 
-  * When request this page on client-side page transitions through [`next/link`](https://nextjs.org/docs/api-reference/next/link) or [`next/router`](https://nextjs.org/docs/api-reference/next/router), Next.js sends an API request to the server, which runs `getServerSideProps`
+  if (error) return <div>Failed to load</div>
+  if (!data) return <div>Loading...</div>
 
-    
+  return (
+    <div>
+      <h1>{data.name}</h1>
+      <p>{data.bio}</p>
+    </div>
+  )
+}
+```
 
-  when to use
 
-  *  only if you need to render a page whose data must be fetched at request time. (such as `authorization` headers or geo location).
 
-    
+best suited
 
-* **SSG: Static-site generation** (uses getStaticProps) :
+* page doesn't require SEO indexing
+* don't need to pre-render your data
+* content of pages needs to update frequently.
 
-  *  pre-render this page at build time
+ Best suit
 
-  
+​	=> Admin pages
 
-  when to use
 
-  - The data required to render the page is available at build time ahead of a user’s request
-  - The data comes from a headless CMS
-  - The data can be publicly cached (not user-specific)
-  - The page must be pre-rendered (for SEO) and be very fast — `getStaticProps` generates `HTML` and `JSON` files, both of which can be cached by a CDN for performance
 
-  
+### SSR
 
-  when does 'getStaticProps run'
+**Client-side rendering** (uses `getInitialProps` or `getServerSideProps`) :
 
-  - `getStaticProps` always runs during `next build`
-  - `getStaticProps` runs in the background when using `revalidate`
-  - `getStaticProps` runs on-demand in the background when using [`unstable_revalidate`](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration#on-demand-revalidation-beta)
+[next doc](https://nextjs.org/docs/basic-features/data-fetching/get-server-side-props)
 
-  
+* only runs on server-side and never runs on the browser.
+* When request this page directly,  `getServerSideProps` runs at request time
+* When request this page on client-side page transitions through [`next/link`](https://nextjs.org/docs/api-reference/next/link) or [`next/router`](https://nextjs.org/docs/api-reference/next/router), Next.js sends an API request to the server, which runs `getServerSideProps`
 
-* **SSG + ISR: incremental static regeneration**  (uses revalidate in getStaticProps)
+when to use
 
-  [next doc](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration)
+*  only if you need to render a page whose data must be fetched at request time. (such as `authorization` headers or geo location).
 
-   
+Best suit
 
-* Mixed (**SSG + client**) : 
+​	=> 
 
-  * data fetch at build time
-  * Additional data fetch on client side( ex. loadMore)
+​		-  fetch data that relates to the user's cookies/activity and is consequently not possible to cache.
+
+​		- fetching frequently-updated data
+
+### SSG
+
+**Static-site generation** (uses `getStaticProps`) :
+
+[next doc](https://nextjs.org/docs/basic-features/data-fetching/get-static-props)
+
+*  pre-render this page at build time
+
+when to use
+
+- The data required to render the page is available at build time ahead of a user’s request
+- The data comes from a headless CMS
+- The data can be publicly cached (not user-specific)
+- The page must be pre-rendered (for SEO) and be very fast — `getStaticProps` generates `HTML` and `JSON` files, both of which can be cached by a CDN for performance
+
+when does 'getStaticProps run'
+
+- `getStaticProps` always runs during `next build`
+- `getStaticProps` runs in the background when using `revalidate`
+- `getStaticProps` runs on-demand in the background when using [`unstable_revalidate`](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration#on-demand-revalidation-beta)
+
+Best suit
+
+​	=>
+
+
+
+### SSG + ISR
+
+**incremental static regeneration**  (uses `revalidate` in `getStaticProps`)
+
+[next doc](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration)
+
+To use ISR, add the `revalidate` prop to `getStaticProps`:
+
+```js
+export async function getStaticProps() {
+  const res = await fetch('https://.../posts')
+  const posts = await res.json()
+
+  return {
+    props: {
+      posts,
+    },
+    // Next.js will attempt to re-generate the page:
+    // - When a request comes in
+    // - At most once every 10 seconds
+    revalidate: 10, // In seconds
+  }
+}
+```
+
+
+
+Example2: fetch comments on server side and revalidate on clinet side
+
+```javascript
+export async function getStaticProps({params}) {
+	const postUid = params.uid
+  const post = (await Client().getByUID('page', postUid))
+
+  // ADDED
+	const commentsResponse = await fetch("https://random-comment-generator.herokuapp.com/")
+	const { comments } = await commentsResponse.json()
+
+  return {
+    props: {
+      post,
+			comments,
+    },
+    // ADDED
+    revalidate: 60_000
+  }
+}
+```
+
+[Using On-Demand Revalidation](https://nextjs.org/docs/basic-features/data-fetching/incremental-static-regeneration#using-on-demand-revalidation)
+
+First, create a secret token only known by your Next.js app. This secret will be used to prevent unauthorized access to the revalidation API Route. You can access the route (either manually or with a webhook) with the following URL structure:
+
+```bash
+https://<your-site.com>/api/revalidate?secret=<token>
+```
+
+Next, add the secret as an [Environment Variable](https://nextjs.org/docs/basic-features/environment-variables) to your application. Finally, create the revalidation API Route:
+
+```jsx
+// pages/api/revalidate.js
+
+export default async function handler(req, res) {
+  // Check for secret to confirm this is a valid request
+  if (req.query.secret !== process.env.MY_SECRET_TOKEN) {
+    return res.status(401).json({ message: 'Invalid token' })
+  }
+
+  try {
+    await res.unstable_revalidate('/path-to-revalidate')
+    return res.json({ revalidated: true })
+  } catch (err) {
+    // If there was an error, Next.js will continue
+    // to show the last successfully generated page
+    return res.status(500).send('Error revalidating')
+  }
+}
+```
+
+ 
+
+### SSG + client (Mixed)
+
+* data fetch at build time
+* Additional data fetch on client side( ex. `loadMore`, `fetch`...)
+
+Best Suit
+
+​	=> pagination page, comments of a blog
+
+
+
+### Dynamic Routes
+
+(uses`getStaticPath` and  `getStaticProps`)
+
+[next doc](https://nextjs.org/docs/basic-features/data-fetching/get-static-paths)
+
+```
+export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { ... } }
+    ],
+    fallback: true // false or 'blocking'
+  };
+}
+```
+
+when to use
+
+- The data comes from a headless CMS
+- The data comes from a database
+- The data comes from the filesystem
+- The data can be publicly cached (not user-specific)
+- The page must be pre-rendered (for SEO) and be very fast — `getStaticProps` generates `HTML` and `JSON` files, both of which can be cached by a CDN for performance
+
+Run at
+
+- `getStaticProps` runs during `next build` for any `paths` returned during build
+- `getStaticProps` runs in the background when using `fallback: true`
+- `getStaticProps` is called before initial render when using `fallback: blocking`
+
+Best suit
+
+​	=> detail [id] page

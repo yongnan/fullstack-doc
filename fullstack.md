@@ -839,3 +839,10 @@ export const logger = pino({
 })
 ```
 
+## services
+
+### Random comment-generator
+
+ returns a random list of 20 different comments at every request.
+
+https://random-comment-generator.herokuapp.com/
