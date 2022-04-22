@@ -254,3 +254,13 @@ Run at
 Best suit
 
 ​	=> detail [id] page
+
+## When to use each data-fetching method
+
+As we've seen, there are a variety of different techniques for data caching in Next.js, and it can be a bit tricky to know which one to use when. We need to know whether data will update infrequently or frequently, as well as where it's coming from. As a TL;DR, here are my recommendations:
+
+- **getStaticProps**: Any data that changes infrequently, particularly from a CMS. (Must be used with **getStaticPaths** if there's a dynamic route).
+- **revalidate:** An easy add-on to **getStaticProps** if the data might change, and we're OK serving a cached version.
+- **getServerSideProps**: Primarily useful with data that must be fetched on the server that changes frequently or depends on user authentication.
+- Client-side with **use-swr**: Great for any data coming from an API that changes frequently.
+- Server Components: To use in the future 🚀
